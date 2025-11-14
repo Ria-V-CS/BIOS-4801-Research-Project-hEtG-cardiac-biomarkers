@@ -1,0 +1,190 @@
+---
+title: "Research Project"
+output: html_document
+date: "2025-11-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+```{r}
+install.packages("car")
+install.packages("MuMIn")
+install.packages("corrr")
+```
+```{r}
+library(car)
+library(MuMIn)
+library(corrr)
+```
+#loading the raw data into the r markdown file.
+```{r}
+data<-read_csv2("DatabasePLOSOne.csv")
+```
+
+Removing the rows of subjects that did not have hEtG measurements that were analyzable as this was a core variable being considered.
+
+```{r}
+data_cleaned <- data %>%
+  filter(hEtG_analyzable == "hEtG analyzed")%>%
+    select(-hEtG_analyzable)
+```
+Confirming the number of rows is still the same if removing the "NA" from hEtG_concentration column. Same number of rowns (156).
+
+```{r}
+test <- data %>%
+  filter(!is.na(hEtG_concentration))
+
+```
+Ensuring that the Rhythmatlab and RhythmEcho are the same. If true, I will simplify by only including a single column with the echocardiogram interpretation of rhythym.
+```{r}
+data_cleaned <- data_cleaned %>%
+  filter(Rhythmatlab == RhythmEcho) %>%
+  mutate(Echo_reading = Rhythmatlab)%>%
+  select(-Rhythmatlab, -RhythmEcho)
+```
+There are a few columns that are not necesary for the resarch question I will be exploring. These include: Sagdiam, CHA2DS2VASc, BPsyst, BPdiast, Alcoholconsumption_units. Therefore, I am removing these columns.
+
+```{r}
+data_cleaned <- data_cleaned %>%
+  select(-Sagdiam, -CHA2DS2VASc, -BPsyst, -BPdiast, -Alcoholconsumption_units,-KOL)
+```
+The biomarkers I am interested in exploring are not clearly named for my understanding. I will add a "cbio" to represent a specificcardiac remodeling biomarker. And a "bio" if it is a biomarker that is measured elsewhere in the body or not directed towards modeling of the heart (liver or LDL).
+```{r}
+data_cleaned <- data_cleaned %>%
+  rename(
+    cbio_BNP = BNP,
+    cbio_ANP = ANP,
+    cbio_EF = EF,
+    cbio_LAVmax_BSA = LAVmax_BSA,
+    cbio_LAVmin_BSA = LAVmin_BSA,
+    bio_AST = AST,
+    bio_ALT = ALT,
+    bio_GGT = `@GT`,
+    bio_GFR = GFR,
+    bio_LDL = LDL,
+    bio_HDL = HDL,
+    bio_TG = TG,
+    bio_hEtGconc = hEtG_concentration
+  )
+```
+In the bio_hEtGconc, there are a lot of 0 values. I would like to classify based off the standard determination of high or low concentration around the 7 bio_hEtGconc measurement.
+```{r}
+
+data_cleaned <- data_cleaned %>%
+  mutate(bio_hEtGgrp = if_else(`bio_hEtGconc` >= 7, "high", "low"))
+```
+I would like to simplify bio_GFR to nominal categorical because it is in that form anyway, just cleaning the name and removing the intial bio_GFR columns as it is not needed now.
+```{r}
+data_cleaned <- data_cleaned %>%
+  mutate(GFR_category = if_else(bio_GFR == "GFR >90", "Normal",
+                         if_else(bio_GFR == "GFR  60-89", "Normal",
+                         if_else(bio_GFR == "GFR 30-59" , "Moderate",
+                         "Severe"))))%>%
+  select(-bio_GFR)
+
+```
+I want to see the distribution of the cardiac biomarkers to determine if a transformation is needed in the case they are skewed.
+```{r}
+ggplot(data_cleaned, aes(x = cbio_BNP)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of BNP",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "BNP", y = "Count")
+ggplot(data_cleaned, aes(x = cbio_ANP)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of ANP",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "ANP", y = "Count")
+ggplot(data_cleaned, aes(x = cbio_EF)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of EF",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "EF", y = "Count")
+ggplot(data_cleaned, aes(x = cbio_LAVmax_BSA)) +
+  geom_histogram(bins = 100)+
+  theme_minimal() +
+  labs(title = "Histogram of LAVmax",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "LAVmax", y = "Count")
+```
+BNP and ANP are right skewed. So I decided to log transform the data and remove the intial column that showed skew. This will help for future analyses now that data is approximately normal.
+
+```{r}
+data_cleaned <- data_cleaned %>%
+  mutate(
+    log_cbio_BNP = log(cbio_BNP),
+    log_cbio_ANP = log(cbio_ANP)
+  )%>%
+  select(-cbio_BNP, cbio_ANP)
+ggplot(data_cleaned, aes(x = log_cbio_BNP)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of logBNP",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "BNP", y = "Count")
+ggplot(data_cleaned, aes(x = log_cbio_ANP)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of logANP",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "ANP", y = "Count")
+```
+```{r}
+#had to search up how to perform left skewed log transformation
+
+data_cleaned <- data_cleaned %>%
+  mutate(
+    EF_reflected = max(cbio_EF, na.rm = TRUE) + 1 - cbio_EF,
+    log_EF_reflected = log(EF_reflected)
+  )
+
+ggplot(data_cleaned, aes(x = log_EF_reflected)) +
+  geom_histogram(bins = 30)+
+  theme_minimal() +
+  labs(title = "Histogram of legEFreflected",
+       subtitle = "Check for skewness & need for log transformation",
+       x = "logEFref", y = "Count")
+
+#########What to do with outlier, not able to find in data set?
+```
+Looking at the cbio_LAVmax_BSA variable as the historgram shows partial skewness and an outlier. The outlier, clinically, is not abnormal and it well within the range of a normal cbio_LAVmax_BSA, so I am keeping for now?
+```{r}
+ggplot(data_cleaned, aes(y = cbio_LAVmax_BSA)) +
+  geom_boxplot(outlier.color = "red") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.2))) +
+  theme_minimal()
+```
+There are a few rows with "NA" values in the data set for LAV min and max, so i am removing those rows as I will need to analyze this variable and would prefer that all data I need is available for each subject
+```{r}
+data_cleaned <- data_cleaned %>%
+  filter(!is.na(cbio_LAVmax_BSA) & !is.na(cbio_LAVmin_BSA))
+```
