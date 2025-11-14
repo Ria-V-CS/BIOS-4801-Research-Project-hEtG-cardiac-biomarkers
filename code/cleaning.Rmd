@@ -102,9 +102,9 @@ data_cleaned <- data_cleaned %>%
 I would like to simplify bio_GFR to nominal categorical because it is in that form anyway, just cleaning the name and removing the intial bio_GFR columns as it is not needed now.
 ```{r}
 data_cleaned <- data_cleaned %>%
-  mutate(GFR_category = if_else(bio_GFR == "GFR >90", "Normal",
-                         if_else(bio_GFR == "GFR  60-89", "Normal",
-                         if_else(bio_GFR == "GFR 30-59" , "Moderate",
+  mutate(GFR_category = if_else(bio_GFR == "GFR >90", "High",
+                         if_else(bio_GFR == "GFR  60-89", "Moderate",
+                         if_else(bio_GFR == "GFR 30-59" , "Low",
                          "Severe"))))%>%
   select(-bio_GFR)
 
@@ -144,7 +144,7 @@ data_cleaned <- data_cleaned %>%
     log_cbio_BNP = log(cbio_BNP),
     log_cbio_ANP = log(cbio_ANP)
   )%>%
-  select(-cbio_BNP, cbio_ANP)
+  select(-cbio_BNP, -cbio_ANP)
 ggplot(data_cleaned, aes(x = log_cbio_BNP)) +
   geom_histogram(bins = 30)+
   theme_minimal() +
@@ -187,4 +187,8 @@ There are a few rows with "NA" values in the data set for LAV min and max, so i 
 ```{r}
 data_cleaned <- data_cleaned %>%
   filter(!is.na(cbio_LAVmax_BSA) & !is.na(cbio_LAVmin_BSA))
+```
+Creating a csv of cleaned data.
+```{r}
+write.csv(data_cleaned, "data_cleaned.csv", row.names = TRUE)
 ```
