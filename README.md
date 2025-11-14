@@ -7,6 +7,7 @@ I hypothesize that patients with higher hEtG levels (>7 pg/mg) will exhibit grea
 To test these hypotheses, we plan to use linear regression for continuous outcomes (with log-transformation where appropriate), Mann-Whitney U or t-tests for group comparisons, and odds ratios with chi-square/Fisher’s exact tests for binary outcomes such as re-ablation. Analyses will account for age, sex, BMI, SBP, type of AF, and heart failure as covariates, and p-values will be corrected for multiple testing. Visualizations such as histograms, boxplots, and scatterplots (facet gender) will aid in understanding data distribution and relationships.
 
 Data Description
+
 The dataset originates from a clinical cohort of AF patients undergoing RFA, with measurements taken before and one year after the procedure. Key variables include:
 Exposure: Hair ethyl glucuronide (hEtG), a biomarker of long-term alcohol intake.
 Structural remodeling: Left atrial volume index (LAVI), including LAVmax and LAVmin.
