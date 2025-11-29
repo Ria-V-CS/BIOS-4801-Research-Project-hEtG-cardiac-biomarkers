@@ -3,16 +3,17 @@ How does long-term alcohol consumption, measured objectively by hair ethyl glucu
 Research Question & Hypotheses
 
 This project investigates how long-term alcohol consumption, measured objectively using hair ethyl glucuronide (hEtG), influences cardiac remodeling and outcomes after radiofrequency ablation (RFA) in patients with atrial fibrillation (AF). Previous studies rely on self-reported alcohol intake, which can be unreliable; hEtG provides a more accurate biomarker of chronic consumption.
-I hypothesize that patients with higher hEtG levels (>7 pg/mg) will exhibit greater structural and functional cardiac remodeling, as indicated by higher left atrial volume index (LAVI) and elevated biomarkers of atrial wall stress (NT-proBNP, MR-proANP).
-To test these hypotheses, we plan to use linear regression for continuous outcomes (with log-transformation where appropriate). Analyses will account for age, sex, BMI, SBP, type of AF, and heart failure as covariates, and p-values will be corrected for multiple testing. Visualizations such as histograms, boxplots, and scatterplots (facet gender) will aid in understanding data distribution and relationships.
+I hypothesize two different ideas:
+1. Remodeling: Patients with higher hEtG levels (>= 7pg/mg) will exhibit significantly greater structural remodeling (higher LAVmaxBSA, LAVminBSA) and elevated wall stress (NT-proBNP,MR-proANP) compared to the low exposure group, after adjusting for clinical covariates.
+2. Function: Higher hEtG levels will be associated with impaired functional outcomes (lower EF).
+To test these hypotheses, I plan to use linear regression for continuous outcomes (with log-transformation where appropriate). Analyses will account for age, sex, BMI, SBP, type of AF, and heart failure as covariates, and p-values will be corrected for multiple testing. Visualizations such as histograms and boxplots (facet gender) will aid in understanding data distribution and relationships.
 
 Data Description
 
 The dataset originates from a clinical cohort of AF patients undergoing RFA, with measurements taken before and one year after the procedure. Key variables include:
 Exposure: Hair ethyl glucuronide (hEtG), a biomarker of long-term alcohol intake.
-Structural remodeling: Left atrial volume index (LAVI), including LAVmax and LAVmin.
-Functional remodeling: NT-proBNP and MR-proANP levels as markers of cardiac wall stress and atrial function.
-Outcomes: Ejection fraction (EF), left atrial ejection fraction (LAEF), and need for repeat ablation within one year.
+Structural remodeling: Left atrial volume index (LAVI), including LAVmax and LAVmin, NT-proBNP and MR-proANP levels as markers of cardiac wall stress.
+Functional outcomes: Ejection fraction (EF).
 Covariates: Age, sex, BMI, SBP, type of AF, history of heart failure
 
 Citation:
