@@ -16,5 +16,7 @@ Structural remodeling: Left atrial volume index (LAVI), including LAVmax and LAV
 Functional outcomes: Ejection fraction (EF).
 Covariates: Age, sex, BMI, SBP, type of AF, history of heart failure
 
+The data was collected in Sweden from patients undergoing RFA at institutions associated with the Department of Medical and Health Sciences at Linköping University and associated hospitals. The study is part of what is referenced as "The SMURF study." The raw data associated with this specific publication was made publicly available via the Dryad Digital Repository
+
 Citation:
 Barmano, N., Charitakis, E., Kronstrand, R., Walfridsson, U., Karlsson, J.-E., Walfridsson, H., & Nyström, F. H. (2019). Data from: The association between alcohol consumption, cardiac biomarkers, left atrial size and re-ablation in patients with atrial fibrillation referred for catheter ablation [Data set]. Zenodo. https://doi.org/10.5061/dryad.869b2n0
