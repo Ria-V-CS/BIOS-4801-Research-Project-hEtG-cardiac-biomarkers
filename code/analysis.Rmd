@@ -1,0 +1,282 @@
+---
+title: "analysis"
+output: html_document
+date: "2025-11-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#installing and loading necessary packages. as I am working on the posit cloud, I need to install the packages every time.
+```{r}
+install.packages("tidyverse")
+install.packages("car")
+install.packages("MuMIn")
+install.packages("corrr")
+```
+```{r}
+library(tidyverse)
+library(car)
+library(MuMIn)
+library(corrr)
+```
+```{r}
+install.packages("broom")
+install.packages("lmtest")
+```
+```{r}
+library(broom)
+library(lmtest)
+```
+#loading the clean data
+```{r}
+data_analysis <- read_csv("data_cleaned.csv")
+```
+Research Question: 
+How does long-term alcohol consumption (hEtG) influence the comprehensive set of cardiac remodeling indicators (cbio_EF,cbio_LAVmax_BSA,cbio_LAVmin_BSA,log_cbio_BNP,log_cbio_ANP) in patients with atrial fibrillation?
+Hypothesis:
+1. Remodeling: Patients with higher hEtG levels (>= 7pg/mg) will exhibit significantly greater structural remodeling (higher LAVmaxBSA, LAVminBSA) and elevated wall stress (NT-proBNP,MR-proANP) compared to the low exposure group, after adjusting for clinical covariates.
+2. Function: Higher hEtG levels will be associated with impaired functional outcomes (lower EF).
+#primary structural outcome anlaysis: cbio_LAVmax_BSA
+#lm will be used to test for this cardiac biomarker. this is so we can also account for clinical factors as well. assumption tests are performed below as well to ensure that the lm test can be done. all were appropriate, hence the lm results were interpreted.
+```{r}
+#checking assumptions
+plot(model_lavmax)
+#no transformations necessary
+#residuals vs fitted plot has random scatter. red line about y=0.
+#qq plot consists of majority data points along the line.
+#scale location and residuals vs leverage show no outstanding outliers. any abnormalities shown are appropriate "enough" to not perform any transformations.
+#able to continue
+```
+```{r}
+model_lavmax <- lm(cbio_LAVmax_BSA ~ bio_hEtGgrp + Age + Gender + BMI +Heartfailure, data = data_analysis)
+
+summary(model_lavmax)
+#variables (bio_hEtGgrplow, GenderWoman, BMI, Heartfailureyes) are not statistically significant predictors of cbio_LAVmax_BSA in this model
+#keeping age in mind, however as you look at LAV min due to 0.08 p value
+```
+
+#secondary structural outcome anlaysis: cbio_LAVmin_BSA
+#lm will be used to test for this cardiac biomarker. this is so we can also account for clinical factors as well. assumption tests are performed below as well to ensure that the lm test can be done. all were appropriate, hence the lm results were interpreted.
+```{r}
+#checking assumptions
+plot(model_lavmin)
+#no transformations necessary
+#residuals vs fitted plot has random scatter. red line about y=0.
+#qq plot consists of majority data points along the line.
+#scale location and residuals vs leverage show no outstanding outliers. any abnormalities shown are appropriate "enough" to not perform any transformations.
+#able to continue
+```
+```{r}
+model_lavmin <- lm(cbio_LAVmin_BSA ~ bio_hEtGgrp + Age + Gender + BMI +Heartfailure, data = data_analysis)
+
+summary(model_lavmin)
+#Age is confirmed as a significant, positive predictor of cbio_LAVmin_BSA, suggesting that older individuals tend to have higher minimum left atrial volume, even after controlling for the other factors (like BMI, Gender, and Heart Failure).
+```
+
+#Functional Stress Outcome log_cbio_BNP
+#lm will be used to test for this cardiac biomarker. this is so we can also account for clinical factors as well. assumption tests are performed below as well to ensure that the lm test can be done. all were appropriate, hence the lm results were interpreted.
+```{r}
+
+
+#checking assumptions
+plot(model_BNP)
+#no transformations necessary
+#residuals vs fitted plot has random scatter. red line about y=0.
+#qq plot consists of majority data points along the line.
+#scale location and residuals vs leverage show no outstanding outliers. any abnormalities shown are appropriate "enough" to not perform any transformations.
+#able to continue
+
+
+model_BNP <- lm(log_cbio_BNP ~ bio_hEtGgrp + Age + Gender + BMI +Heartfailure, data = data_analysis)
+
+summary(model_BNP)
+#This model is robust and statistically successful in identifying key factors associated with B-type Natriuretic Peptide (BNP) levels:
+
+#Highly Significant Predictors: Heart Failure, Age, and Gender (Woman) are all strongly and positively associated with higher BNP levels.
+
+#Significant Predictor: The bio_hEtGgrplow group is significantly associated with lower BNP levels.
+
+
+```
+
+#Functional Stress Outcome log_cbio_ANP
+#lm will be used to test for this cardiac biomarker. this is so we can also account for clinical factors as well. assumption tests are performed below as well to ensure that the lm test can be done. all were appropriate, hence the lm results were interpreted.
+```{r}
+#checking assumptions
+plot(model_ANP)
+#no transformations necessary
+#residuals vs fitted plot has random scatter. red line about y=0.
+#qq plot consists of majority data points along the line.
+#scale location and residuals vs leverage show no outstanding outliers. any abnormalities shown are appropriate "enough" to not perform any transformations.
+#able to continue
+
+model_ANP <- lm(log_cbio_ANP ~ bio_hEtGgrp + Age + Gender + BMI +Heartfailure, data = data_analysis)
+
+summary(model_ANP)
+#this model confirms that Age and Heart Failure significantly increase ANP levels, but unlike BNP, ANP levels are not significantly associated with Gender or BMI in this data.
+
+```
+#Functional Outcome cbio_EF
+#lm will be used to test for this cardiac biomarker. this is so we can also account for clinical factors as well. assumption tests are performed below as well to ensure that the lm test can be done. all were appropriate, hence the lm results were interpreted.
+```{r}
+
+#checking assumptions
+plot(model_EF)
+#no transformations necessary...has already been performed in the cleaning rmd
+#residuals vs fitted plot has random scatter. red line about y=0.
+#qq plot consists of majority data points along the line. there is a some deviation from the line, but it is not able to be fixed with the transformation. for this case, some non-normality is appropriate, and further analysis can continue.
+#scale location and residuals vs leverage show no outstanding outliers. any abnormalities shown are appropriate "enough" to not perform any transformations.
+#able to continue
+
+model_EF <- lm(log_EF ~ bio_hEtGgrp + Age + Gender + BMI +Heartfailure, data = data_analysis)
+
+summary(model_EF)
+#The model strongly confirms the expected clinical relationship between Heart Failure and Ejection Fraction.Heart Failure is the most powerful and highly significant predictor, leading to a substantial decrease in EF.  Age and bio_hEtGgrplow are not significant predictors of Ejection Fraction in this model. This is an interesting finding, as it suggests the differences in EF are primarily driven by disease state (Heart Failure) rather than age or the bio_hEtGgrp variable.
+
+
+```
+Choice of Test: Multiple Linear Regressions models
+Justification based on Research Question, Data Properties, and Assumptions:
+-->Research Question Suitability: Multiple Linear Regressions models is the best choice because the central goal is to estimate the unique, independent contribution of the primary categorical predictor (bio_hEtGgrp) on multiple continuous outcomes (all five cardiac biomarkers) while simultaneously controlling for the effects of multiple continuous and categorical confounding variables (age,gender,bmi, etc.). This approach provides the most robust estimate of the alcohol-cardiac remodeling link, adjusting for baseline risk factors.
+Data Properties: The nature of all five outcome variables (continuous, or successfully transformed into continuous, approximately normally distributed values) and the mix of continuous and categorical confounding variables aligns with the  requirements of the Multiple Linear Regressions models idea. 
+Assumption Justification: As confirmed by the formal tests on primary LAV max cardiac biomarker, the required assumptions for the residuals (Normality and Homoscedasticity) were appropriate for testing. Furthermore, the necessary transformations applied in the data cleaning phase ensured that all other models are also appropriately structured to meet these assumptions, validating the use of this test across all cardiac outcomes.
+
+
+#producing figure 1
+#Atrial Wall Stress (NT-proBNP) by Alcohol Exposure and Gender
+```{r}
+#creating the p values necesary to be able to "*" on the graph of the figure comparing alcohol intake amongst different genders. this is to be able to put onto the figure for audience to determine if there was a signficant difference between two groups.
+p_values_A <- data_analysis %>%
+  group_by(Gender) %>%
+  summarize(
+    p_value = t.test(log_cbio_BNP ~ bio_hEtGgrp)$p.value,
+  ) %>%
+  mutate(
+    label = case_when(
+      p_value < 0.001 ~ "***",
+      p_value < 0.01 ~ "**",
+      p_value < 0.05 ~ "*",
+      TRUE ~ "NS"
+    ),
+    x_coord = 1.5,
+    y_coord = max(data_analysis$log_cbio_BNP, na.rm = TRUE) + 0.5
+  )
+p_values_A
+#actually creating the figure
+figure1 <- data_analysis %>%
+  ggplot(aes(x = bio_hEtGgrp, y = log_cbio_BNP)) +
+  geom_boxplot(aes(fill = bio_hEtGgrp), outlier.shape = NA) +
+  facet_wrap(~ Gender) +
+
+  labs(
+    title = "Figure A: Atrial Wall Stress (NT-proBNP) by hEtG Exposure and Gender",
+    x = "Long-Term Alcohol Exposure (hEtG Group)",
+    y = expression("log(BNP pg/ml)"),
+    caption = "high indicates greater than or equal to 7 pg/mg \nlow indicates less than 7 pg/mg"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    strip.text = element_text(size = 12),
+    legend.position = "none" ,
+    plot.caption = element_text(hjust = 0.5)
+  )+
+geom_text(
+    data = p_values_A,
+    aes(x = x_coord, y = y_coord, label = label),
+    size = 6,
+  )
+
+figure1
+```
+```{r}
+#saving the file
+ggsave(
+  filename = "Figure 1: Atrial Wall Stress (NT-proBNP) by hEtG Exposure and Gender.png",
+  width = 9,           
+  height = 6,
+  units = "in",
+  dpi = 300,
+  plot = figure1)
+
+```
+#producing figure 2
+#Ejection Fraction (EF) Driven by Heart Failure Status
+```{r}
+#creating the p values necesary to be able to "*" on the graph of the figure comparing heart failure amongst those with high and low alcohol measurements. this is to be able to put onto the figure for audience to determine if there was a signficant difference between two groups.
+p_values_B <- data_analysis %>%
+  group_by(bio_hEtGgrp) %>%
+  summarize(
+    comparison_name = "No HF vs. Yes HF",
+    p_value = t.test(log_EF ~ Heartfailure)$p.value
+  ) %>%
+  mutate(
+    label = case_when(
+      p_value < 0.001 ~ "***",
+      p_value < 0.01 ~ "**",
+      p_value < 0.05 ~ "*",
+      TRUE ~ "NS"
+    ),
+    x_coord = 1.5,
+    y_coord = max(data_analysis$log_EF, na.rm = TRUE) + 0.05
+  )
+#actually creating the figure
+figure2 <- data_analysis %>%
+  ggplot(aes(x = Heartfailure, y = log_EF)) +
+  geom_boxplot(aes(fill = Heartfailure), outlier.shape = NA) +
+  # Facet by hEtG Group
+  facet_wrap(~ bio_hEtGgrp) +
+  # Labels and Titles
+  labs(
+    title = "Figure B: Ejection Fraction Driven by Heart Failure Status Across Alcohol Groups",
+    x = "Clinical History (Heart Failure)",
+    y = "log(EF)",
+    caption = "high indicates greater than or equal to 7 pg/mg \nlow indicates less than 7 pg/mg") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    strip.text = element_text(size = 12),
+    legend.position = "none" ,
+    
+        plot.caption = element_text(hjust = 0.5)
+)+
+  geom_text(
+    data = p_values_B,
+    aes(x = x_coord, y = y_coord, label = label),
+    size = 6,
+  )
+figure2
+```
+```{r}
+#saving the figure 2
+ggsave(
+  filename = "Figure 2: Ejection Fraction Driven by Heart Failure Status Across Alcohol Groups.png",
+  width = 10,           
+  height = 6,
+  units = "in",
+  dpi = 300,
+  plot = figure2)
+
+```
