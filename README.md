@@ -10,7 +10,7 @@ To test these hypotheses, I plan to use linear regression for continuous outcome
 
 Data Description
 
-The dataset originates from a clinical cohort of AF patients undergoing RFA, with measurements taken before and one year after the procedure. Key variables include:
+The dataset originates from a clinical cohort of AF patients undergoing RFA, with measurements taken during evaluation of patient. Key variables include:
 Exposure: Hair ethyl glucuronide (hEtG), a biomarker of long-term alcohol intake.
 Structural remodeling: Left atrial volume index (LAVI), including LAVmax and LAVmin, NT-proBNP and MR-proANP levels as markers of cardiac wall stress.
 Functional outcomes: Ejection fraction (EF).
